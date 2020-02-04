@@ -39,8 +39,8 @@ private:
     int getPriority(QChar op)const;
     double _calculateTwoNums(double first, double second, QChar oper)const;
     bool extractInput(const QString& input);
-     void inorder2postorder(QVector<InputItem*>& postOrder)const;
-     double _calculate(const QVector<InputItem*>& postOrder)const;
+    void inorder2postorder(QVector<InputItem*>& postOrder)const;
+    double _calculate(const QVector<InputItem*>& postOrder)const;
 public:
     ExpressionEvaluation();
     ~ExpressionEvaluation();

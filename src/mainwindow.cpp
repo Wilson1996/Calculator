@@ -52,8 +52,9 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->B_equal, &QPushButton::clicked, [this]()
             {
                 double res = calculator->calculate(ui->display->toPlainText());
-                qDebug() << res;
-//                ui->display->setText(res);
+                QString s_res = QString("%1").arg(res);
+//                QString s_res = QString::number(res, 'f', 10);
+                ui->display->setText(s_res);
             });
 }
 
