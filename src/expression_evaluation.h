@@ -15,7 +15,8 @@
 #include <QDebug>
 #include <iostream>
 
-enum TYPE{NUMBER, OPER};
+enum TYPE{NUMBER, OPER, BRACKT};
+enum ERROR{NONE, INVALID_OPER, INVALID_BRACKT, INVALID_EXPRESSION};
 
 struct InputItem
 {
@@ -26,19 +27,20 @@ struct InputItem
     }val;
     TYPE type;
     InputItem(double v){val.number = v; type = NUMBER;}
-    InputItem(QChar v){val.oper = v.toLatin1(); type = OPER;}
+    InputItem(QChar v, TYPE t = OPER){val.oper = v.toLatin1(); type = t;}
 };
 
 class ExpressionEvaluation
 {
 private:
-    // std::stack<double> nums;
-    // std::stack<char> ops;
     QVector<InputItem*> items;
+    ERROR err;
 
+    int getPriority(QChar op)const;
+    double _calculateTwoNums(double first, double second, QChar oper)const;
     bool extractInput(const QString& input);
-    // void inorder2preorder(const std::)
-    // void inorder2postorder(const std::)
+     void inorder2postorder(QVector<InputItem*>& postOrder)const;
+     double _calculate(const QVector<InputItem*>& postOrder)const;
 public:
     ExpressionEvaluation();
     ~ExpressionEvaluation();
