@@ -21,7 +21,5 @@ public:
 private:
     Ui::MainWindow *ui;
     ExpressionEvaluation* calculator;
-//    QStack<double> nums;
-//    QStack<char> ops;
 };
 #endif // MAINWINDOW_H

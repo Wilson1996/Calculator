@@ -7,7 +7,6 @@ MainWindow::MainWindow(QWidget *parent)
     , calculator(new ExpressionEvaluation)
 {
     ui->setupUi(this);
-    ui->display->setStyleSheet("background-color: rgb(200,200,100)");
     connect(ui->B_0,&QPushButton::clicked,[this]()
             { this->ui->display->setText(this->ui->display->toPlainText()+"0"); });
     connect(ui->B_1,&QPushButton::clicked,[this]()
@@ -28,6 +27,10 @@ MainWindow::MainWindow(QWidget *parent)
             { this->ui->display->setText(this->ui->display->toPlainText()+"8"); });
     connect(ui->B_9,&QPushButton::clicked,[this]()
             { this->ui->display->setText(this->ui->display->toPlainText()+"9"); });
+    connect(ui->B_pi,&QPushButton::clicked,[this]()
+            { this->ui->display->setText(this->ui->display->toPlainText()+"π"); });
+    connect(ui->B_naturalNum,&QPushButton::clicked,[this]()
+            { this->ui->display->setText(this->ui->display->toPlainText()+"e"); });
     connect(ui->B_plus,&QPushButton::clicked,[this]()
             { this->ui->display->setText(this->ui->display->toPlainText()+"+"); });
     connect(ui->B_minus,&QPushButton::clicked,[this]()
@@ -42,6 +45,8 @@ MainWindow::MainWindow(QWidget *parent)
             { this->ui->display->setText(this->ui->display->toPlainText()+"("); });
     connect(ui->B_rightBrackt,&QPushButton::clicked,[this]()
             { this->ui->display->setText(this->ui->display->toPlainText()+")"); });
+    connect(ui->B_percent,&QPushButton::clicked,[this]()
+            { this->ui->display->setText(this->ui->display->toPlainText()+"%"); });
     connect(ui->B_AC,&QPushButton::clicked,[this]()
             { this->ui->display->clear(); });
     connect(ui->B_del,&QPushButton::clicked,[this]()
@@ -52,9 +57,10 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->B_equal, &QPushButton::clicked, [this]()
             {
                 double res = calculator->calculate(ui->display->toPlainText());
-                QString s_res = QString("%1").arg(res);
-//                QString s_res = QString::number(res, 'f', 10);
-                ui->display->setText(s_res);
+//                QString s_res = QString("%1").arg(res);
+                QString s_res = QString::number(res, 'g', 15);
+                QStringList s_list = ui->display->toPlainText().split('\n');
+                ui->display->setText(s_list[0] + "\n\n=" + s_res);
             });
 }
 

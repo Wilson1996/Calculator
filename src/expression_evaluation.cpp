@@ -8,49 +8,14 @@
  */
 #include "expression_evaluation.h"
 
-bool ExpressionEvaluation::extractInput(const QString &input)
+
+bool ExpressionEvaluation::isOpeartor(const QChar& ch)const
 {
-    items.clear();
-    QString substr;
-    bool isMinus = false;
-    for (int i = 0; i < input.size(); ++i)
-    {
-        if(input[i] == '+' || input[i] == '-' || input[i] == '*' || input[i] == '/'
-                || input[i] == '(' || input[i] == ')')
-        {
-            if(substr.size() != 0)
-            {
-                items.push_back(new InputItem(substr.toDouble()));
-                substr.clear();
-            }
-            if(input[i] == '-' && (i == 0 || input[i-1] == '('))
-                items.push_back(new InputItem('m', OPER));  //m means minus
-            else if(input[i] == '(' || input[i] == ')')
-                items.push_back(new InputItem(input[i], BRACKT));
-            else
-                items.push_back(new InputItem(input[i], OPER));
-        }
-        else
-        {
-            substr.push_back(input[i]);
-        }
-    }
-    if(substr.size() != 0)
-    {
-        items.push_back(new InputItem(substr.toDouble()));
-    }
-//    //debug
-//    for(auto iter = items.begin(); iter != items.end(); ++iter)
-//    {
-//        if((*iter)->type == NUMBER)
-//            qDebug() << (*iter)->val.number << " ";
-//        else
-//            qDebug() << (*iter)->val.oper << " ";
-//    }
-    return true;
+    return (ch == '+' || ch == '-' || ch == '*' || ch == '/'
+            || ch == '(' || ch == ')' || ch == '%');
 }
 
-int ExpressionEvaluation::getPriority(QChar op)const
+int ExpressionEvaluation::getPriority(const QChar& op)const
 {
     int prior = 0;
     switch (op.toLatin1())
@@ -65,6 +30,9 @@ int ExpressionEvaluation::getPriority(QChar op)const
         break;
     case 'm':
         prior = 10;
+        break;
+    case '%':
+        prior = 9;
         break;
     default:
 //        err = INVALID_OPER;
@@ -82,8 +50,76 @@ double ExpressionEvaluation::_calculateTwoNums(double first, double second, QCha
     case '*': return first * second;
     case '/': return first / second;
     case 'm': return first - second;
+    case '%': return second * 0.01;
     default: return 0;
     }
+}
+
+double ExpressionEvaluation::string2double(const QString& str)const
+{
+    bool OK = false;
+    double res = str.toDouble(&OK);
+    if(OK)
+        return res;
+    else
+    {
+        if(str.back() == "π")
+        {
+            QString substr = str;
+            substr = substr.remove(substr.size()-1, 1);
+            return substr.size()==0? PI: substr.toDouble()*PI;
+        }
+        else if(str.back() == "e")
+        {
+            QString substr = str;
+            substr = substr.remove(substr.size()-1, 1);
+            return substr.size()==0? NATURAL_NUM: substr.toDouble()*NATURAL_NUM;
+        }
+    }
+    return res;
+}
+
+bool ExpressionEvaluation::extractInput(const QString &input)
+{
+    items.clear();
+    QString substr;
+    bool isMinus = false;
+    for (int i = 0; i < input.size(); ++i)
+    {
+        if(input[i] == '\n')
+            break;
+        if(isOpeartor(input[i]))
+        {
+            if(substr.size() != 0)
+            {
+                items.push_back(new InputItem(string2double(substr)));
+                substr.clear();
+            }
+            if(input[i] == '-' && (i == 0 || input[i-1] == '('))
+                items.push_back(new InputItem('m', OPER));  //m means minus
+            else if(input[i] == '(' || input[i] == ')')
+                items.push_back(new InputItem(input[i], BRACKT));
+            else
+                items.push_back(new InputItem(input[i], OPER));
+        }
+        else
+        {
+            substr.push_back(input[i]);
+        }
+    }
+    if(substr.size() != 0)
+    {
+        items.push_back(new InputItem(string2double(substr)));
+    }
+//    //debug
+//    for(auto iter = items.begin(); iter != items.end(); ++iter)
+//    {
+//        if((*iter)->type == NUMBER)
+//            qDebug() << (*iter)->val.number << " ";
+//        else
+//            qDebug() << (*iter)->val.oper << " ";
+//    }
+    return true;
 }
 
 void ExpressionEvaluation::inorder2postorder(QVector<InputItem*>& postOrder)const
@@ -150,7 +186,7 @@ double ExpressionEvaluation::_calculate(const QVector<InputItem*>& postOrder)con
         {
             double second = nums.pop();
             double first;
-            if(nums.empty() || postOrder[i]->val.oper == 'm')
+            if(nums.empty() || postOrder[i]->val.oper == 'm' || postOrder[i]->val.oper == '%')
                 first = 0;
             else
                 first = nums.pop();
@@ -172,10 +208,6 @@ ExpressionEvaluation::~ExpressionEvaluation()
         if (*iter != nullptr)
             delete (*iter);
     }
-	for(int i = 0; i < items.size(); ++i)
-	{
-		
-	}
 }
 
 double ExpressionEvaluation::calculate(const QString &expression)
